@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ember & Spice — Fine Dining</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #FAF6EE;
+      --dark: #1A1208;
+      --brown: #3D2B1F;
+      --amber: #C8841A;
+      --amber-light: #F5E6C8;
+      --muted: #7A6A58;
+      --border: #E0D5C0;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--dark);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(26,18,8,0.96);
+      backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%;
+      height: 68px;
+    }
+    .nav-logo {
+      font-family: 'Playfair Display', serif;
+      color: #F5E6C8;
+      font-size: 1.4rem;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--amber); font-style: italic; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: #C8BBA8; text-decoration: none;
+      font-size: 0.88rem; font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--amber); }
+    .nav-reserve {
+      background: var(--amber); color: #fff;
+      border: none; padding: 0.55rem 1.4rem;
+      border-radius: 2px; font-size: 0.82rem;
+      font-weight: 500; letter-spacing: 0.08em;
+      text-transform: uppercase; cursor: pointer;
+      transition: background 0.2s; font-family: 'DM Sans', sans-serif;
+    }
+    .nav-reserve:hover { background: #A86A0E; }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: #C8BBA8; transition: 0.3s; }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(160deg, #1A1208 0%, #2E1E0F 60%, #1A1208 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 6rem 5% 4rem;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: radial-gradient(ellipse 80% 60% at 50% 40%, rgba(200,132,26,0.12) 0%, transparent 70%);
+    }
+    .hero-tag {
+      display: inline-block;
+      background: transparent;
+      border: 1px solid rgba(200,132,26,0.5);
+      color: var(--amber);
+      font-size: 0.75rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      padding: 0.4rem 1.2rem; border-radius: 2px;
+      margin-bottom: 2rem;
+    }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+      color: #FAF6EE;
+      line-height: 1.05;
+      font-weight: 400;
+      margin-bottom: 0.2em;
+    }
+    .hero h1 em { color: var(--amber); font-style: italic; }
+    .hero-sub {
+      color: #A09080; font-size: 1.05rem;
+      font-weight: 300; max-width: 440px;
+      margin: 1.5rem auto 2.5rem;
+    }
+    .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--amber); color: #fff;
+      padding: 0.85rem 2.2rem; border: none;
+      font-size: 0.88rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s;
+      font-family: 'DM Sans', sans-serif;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-primary:hover { background: #A86A0E; }
+    .btn-outline {
+      background: transparent; color: #F5E6C8;
+      padding: 0.85rem 2.2rem;
+      border: 1px solid rgba(245,230,200,0.35);
+      font-size: 0.88rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'DM Sans', sans-serif;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-outline:hover { border-color: var(--amber); color: var(--amber); }
+    .hero-scroll {
+      position: absolute; bottom: 2.5rem;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 0.4rem;
+      color: #7A6A58; font-size: 0.75rem;
+      letter-spacing: 0.12em; text-transform: uppercase;
+    }
+    .hero-scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, var(--amber), transparent);
+    }
+
+    /* SECTION COMMON */
+    section { padding: 6rem 5%; }
+    .section-tag {
+      display: inline-block;
+      color: var(--amber); font-size: 0.75rem;
+      font-weight: 500; letter-spacing: 0.18em;
+      text-transform: uppercase; margin-bottom: 1rem;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 400; line-height: 1.2;
+      color: var(--dark); margin-bottom: 1.2rem;
+    }
+    .section-title em { font-style: italic; color: var(--amber); }
+    .divider {
+      width: 48px; height: 2px;
+      background: var(--amber); margin: 1.5rem 0;
+    }
+
+    /* ABOUT */
+    .about {
+      background: var(--dark);
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 5rem; align-items: center;
+    }
+    .about .section-title { color: #FAF6EE; }
+    .about p { color: #A09080; font-weight: 300; margin-bottom: 1rem; }
+    .about-stats {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1.5rem; margin-top: 2.5rem;
+    }
+    .stat { border-left: 2px solid var(--amber); padding-left: 1rem; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem; color: #FAF6EE; line-height: 1;
+    }
+    .stat-label { font-size: 0.8rem; color: #7A6A58; letter-spacing: 0.06em; margin-top: 0.2rem; }
+    .about-visual {
+      background: #2E1E0F;
+      border: 1px solid #3D2B1F;
+      border-radius: 2px;
+      aspect-ratio: 4/5;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; position: relative;
+    }
+    .about-visual-inner {
+      text-align: center;
+    }
+    .plate-icon { font-size: 5rem; opacity: 0.15; }
+    .about-badge {
+      position: absolute; bottom: 2rem; right: -1.5rem;
+      background: var(--amber);
+      padding: 1.2rem 1.5rem;
+      border-radius: 2px; text-align: center;
+    }
+    .about-badge-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem; color: #fff; display: block; line-height: 1;
+    }
+    .about-badge-text { font-size: 0.75rem; color: rgba(255,255,255,0.85); letter-spacing: 0.06em; }
+
+    /* MENU */
+    .menu { background: var(--cream); text-align: center; }
+    .menu-tabs {
+      display: flex; gap: 0; justify-content: center;
+      border: 1px solid var(--border); display: inline-flex;
+      border-radius: 2px; overflow: hidden; margin: 2.5rem 0 3rem;
+    }
+    .menu-tab {
+      padding: 0.6rem 1.6rem; background: transparent;
+      border: none; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.82rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); transition: all 0.2s;
+    }
+    .menu-tab.active { background: var(--dark); color: #F5E6C8; }
+    .menu-tab:not(.active):hover { background: var(--amber-light); }
+    .menu-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5px; background: var(--border);
+      border: 1px solid var(--border); text-align: left;
+    }
+    .menu-item {
+      background: #FAF6EE; padding: 1.8rem 2rem;
+      transition: background 0.2s;
+    }
+    .menu-item:hover { background: #F5EDD8; }
+    .menu-item-header {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; gap: 1rem; margin-bottom: 0.5rem;
+    }
+    .menu-item-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem; font-weight: 600; color: var(--dark);
+    }
+    .menu-item-price {
+      font-size: 0.95rem; font-weight: 500;
+      color: var(--amber); white-space: nowrap;
+    }
+    .menu-item-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
+    .menu-tag {
+      display: inline-block; font-size: 0.7rem;
+      padding: 0.2rem 0.6rem; border-radius: 2px;
+      font-weight: 500; letter-spacing: 0.06em;
+      text-transform: uppercase; margin-top: 0.8rem;
+    }
+    .tag-chef { background: #FEF3CD; color: #8B6300; }
+    .tag-veg  { background: #D4EDDA; color: #155724; }
+    .tag-spicy { background: #FDDEDE; color: #7B1818; }
+    .menu-category { display: none; }
+    .menu-category.active { display: contents; }
+
+    /* HOURS */
+    .hours {
+      background: #F0E8D5;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 5rem; align-items: start;
+    }
+    .hours-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    .hours-table tr { border-bottom: 1px solid var(--border); }
+    .hours-table tr:last-child { border-bottom: none; }
+    .hours-table td { padding: 0.85rem 0; font-size: 0.95rem; }
+    .hours-table td:first-child { color: var(--dark); font-weight: 500; }
+    .hours-table td:last-child { text-align: right; color: var(--muted); }
+    .closed { color: #C0392B !important; }
+    .open-badge {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: #D4EDDA; color: #155724;
+      font-size: 0.78rem; font-weight: 500;
+      padding: 0.35rem 0.9rem; border-radius: 2px;
+      margin-bottom: 1.5rem; letter-spacing: 0.06em;
+    }
+    .open-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%; background: #28A745;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.3); }
+    }
+    .contact-card {
+      background: var(--dark); color: #F5E6C8;
+      padding: 2.5rem; border-radius: 2px;
+    }
+    .contact-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; font-weight: 400; margin-bottom: 1.5rem;
+    }
+    .contact-row {
+      display: flex; gap: 1rem; align-items: flex-start;
+      margin-bottom: 1.2rem; font-size: 0.92rem;
+    }
+    .contact-icon { color: var(--amber); font-size: 1.1rem; margin-top: 0.1rem; flex-shrink: 0; }
+    .contact-row p { color: #A09080; line-height: 1.5; }
+    .contact-row a { color: var(--amber); text-decoration: none; }
+    .contact-row a:hover { text-decoration: underline; }
+
+    /* RESERVATION */
+    .reservation {
+      background: var(--dark); text-align: center;
+    }
+    .reservation .section-title { color: #FAF6EE; }
+    .reservation .section-tag { color: var(--amber); }
+    .reservation p { color: #A09080; max-width: 500px; margin: 0 auto 3rem; }
+    .res-form {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 1rem; max-width: 640px; margin: 0 auto;
+      text-align: left;
+    }
+    .form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+    .form-group.full { grid-column: 1 / -1; }
+    .form-group label {
+      font-size: 0.78rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      color: #7A6A58;
+    }
+    .form-group input, .form-group select {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid #3D2B1F; color: #F5E6C8;
+      padding: 0.75rem 1rem; font-size: 0.95rem;
+      font-family: 'DM Sans', sans-serif;
+      border-radius: 2px; outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    .form-group select { background-color: #2E1E0F; }
+    .form-group input::placeholder { color: #5A4A38; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--amber); }
+    .res-submit {
+      grid-column: 1/-1; background: var(--amber);
+      color: #fff; border: none; padding: 1rem;
+      font-size: 0.9rem; font-weight: 500;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.2s;
+      font-family: 'DM Sans', sans-serif; border-radius: 2px;
+      margin-top: 0.5rem;
+    }
+    .res-submit:hover { background: #A86A0E; }
+
+    /* FOOTER */
+    footer {
+      background: #110D06; color: #5A4A38;
+      text-align: center; padding: 3rem 5%;
+      font-size: 0.85rem; line-height: 2;
+    }
+    footer .footer-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; color: #F5E6C8; margin-bottom: 0.5rem;
+    }
+    footer .footer-logo span { color: var(--amber); font-style: italic; }
+    footer a { color: #7A6A58; text-decoration: none; }
+    footer a:hover { color: var(--amber); }
+    .footer-links { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; margin: 1rem 0; }
+    .footer-divider { border: none; border-top: 1px solid #1E1410; margin: 1.5rem 0; }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .nav-links, .nav-reserve { display: none; }
+      .hamburger { display: flex; }
+      .about, .hours { grid-template-columns: 1fr; gap: 3rem; }
+      .about-badge { right: 0; }
+      .res-form { grid-template-columns: 1fr; }
+      .form-group.full { grid-column: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">Ember <span>&</span> Spice</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#hours">Hours</a></li>
+    <li><a href="#reservation">Reserve</a></li>
+  </ul>
+  <button class="nav-reserve" onclick="document.getElementById('reservation').scrollIntoView({behavior:'smooth'})">Reserve a Table</button>
+  <div class="hamburger" onclick="alert('Menu: About | Menu | Hours | Reserve')">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-tag">Est. 2018 · Fine Dining</div>
+  <h1>Where Fire Meets <em>Flavour</em></h1>
+  <p class="hero-sub">A celebration of bold spices and slow-cooked tradition, elevated for the modern table.</p>
+  <div class="hero-cta">
+    <a class="btn-primary" href="#menu">Explore Menu</a>
+    <a class="btn-outline" href="#reservation">Book a Table</a>
+  </div>
+  <div class="hero-scroll">
+    <div class="hero-scroll-line"></div>
+    Scroll
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div>
+    <span class="section-tag">Our Story</span>
+    <h2 class="section-title">Crafted with <em>Passion</em>, Served with Pride</h2>
+    <div class="divider" style="background:var(--amber)"></div>
+    <p>Ember & Spice was born from a love of fire — the slow burn of a tandoor, the crackle of a woodfire grill, and the warmth of a shared meal.</p>
+    <p>Every dish on our menu is a story: spices sourced directly from family farms, recipes passed down through generations, and techniques refined over decades. We believe the best food carries the memory of the hands that made it.</p>
+    <div class="about-stats">
+      <div class="stat">
+        <div class="stat-num">7+</div>
+        <div class="stat-label">Years of excellence</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">40+</div>
+        <div class="stat-label">Menu items</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">12</div>
+        <div class="stat-label">Master chefs</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">50k+</div>
+        <div class="stat-label">Happy guests</div>
+      </div>
+    </div>
+  </div>
+  <div style="position:relative;">
+    <div class="about-visual">
+      <div class="about-visual-inner">
+        <div style="font-size:7rem;opacity:0.08;">🍽</div>
+        <p style="color:#5A4A38;font-family:'Playfair Display',serif;font-style:italic;font-size:1.1rem;margin-top:1rem;">Add your restaurant photo here</p>
+      </div>
+      <div class="about-badge">
+        <span class="about-badge-num">★ 4.9</span>
+        <span class="about-badge-text">Guest Rating</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MENU -->
+<section class="menu" id="menu">
+  <span class="section-tag">Our Menu</span>
+  <h2 class="section-title">A Feast for <em>Every Sense</em></h2>
+  <div class="divider" style="margin:1.5rem auto;"></div>
+
+  <div class="menu-tabs">
+    <button class="menu-tab active" onclick="switchTab(this,'starters')">Starters</button>
+    <button class="menu-tab" onclick="switchTab(this,'mains')">Mains</button>
+    <button class="menu-tab" onclick="switchTab(this,'desserts')">Desserts</button>
+    <button class="menu-tab" onclick="switchTab(this,'drinks')">Drinks</button>
+  </div>
+
+  <div class="menu-grid">
+
+    <div class="menu-category active" id="cat-starters">
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Tandoori Paneer Tikka</span>
+          <span class="menu-item-price">₹380</span>
+        </div>
+        <p class="menu-item-desc">Cottage cheese cubes marinated in smoky spiced yogurt, char-grilled in the tandoor.</p>
+        <span class="menu-tag tag-veg">Vegetarian</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Seekh Kebab Platter</span>
+          <span class="menu-item-price">₹520</span>
+        </div>
+        <p class="menu-item-desc">Minced lamb with garam masala, ginger, and herbs, skewered and roasted over coal.</p>
+        <span class="menu-tag tag-chef">Chef's Pick</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Crispy Corn Chaat</span>
+          <span class="menu-item-price">₹280</span>
+        </div>
+        <p class="menu-item-desc">Golden fried corn tossed with tangy tamarind chutney, red onion, and fresh coriander.</p>
+        <span class="menu-tag tag-veg">Vegetarian</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Mutton Galouti Kebab</span>
+          <span class="menu-item-price">₹620</span>
+        </div>
+        <p class="menu-item-desc">Melt-in-mouth minced mutton patties with 40 spices, served on warqi paratha.</p>
+        <span class="menu-tag tag-chef">Chef's Pick</span>
+      </div>
+    </div>
+
+    <div class="menu-category" id="cat-mains">
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Dal Makhani</span>
+          <span class="menu-item-price">₹420</span>
+        </div>
+        <p class="menu-item-desc">Black lentils simmered overnight with tomatoes, butter, and cream. A timeless classic.</p>
+        <span class="menu-tag tag-veg">Vegetarian</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Rogan Josh</span>
+          <span class="menu-item-price">₹680</span>
+        </div>
+        <p class="menu-item-desc">Slow-braised lamb in Kashmiri spices, dried rose petals, and fennel-kissed gravy.</p>
+        <span class="menu-tag tag-spicy">Spicy</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Butter Chicken</span>
+          <span class="menu-item-price">₹580</span>
+        </div>
+        <p class="menu-item-desc">Tandoor-roasted chicken in a rich tomato-fenugreek cream sauce. Our most loved dish.</p>
+        <span class="menu-tag tag-chef">Chef's Pick</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Palak Paneer</span>
+          <span class="menu-item-price">₹440</span>
+        </div>
+        <p class="menu-item-desc">Fresh cottage cheese in a vibrant spinach gravy with garlic tempering and cream swirl.</p>
+        <span class="menu-tag tag-veg">Vegetarian</span>
+      </div>
+    </div>
+
+    <div class="menu-category" id="cat-desserts">
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Gulab Jamun</span>
+          <span class="menu-item-price">₹220</span>
+        </div>
+        <p class="menu-item-desc">Soft milk-solid dumplings in rose-cardamom sugar syrup, served warm.</p>
+        <span class="menu-tag tag-veg">Vegetarian</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Kulfi on Stick</span>
+          <span class="menu-item-price">₹180</span>
+        </div>
+        <p class="menu-item-desc">Slow-frozen dense ice cream with saffron, pistachio, and rose water. Served with falooda.</p>
+        <span class="menu-tag tag-chef">Chef's Pick</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Shahi Tukda</span>
+          <span class="menu-item-price">₹260</span>
+        </div>
+        <p class="menu-item-desc">Fried bread soaked in sugar syrup, topped with thickened rabri and edible silver leaf.</p>
+        <span class="menu-tag tag-veg">Vegetarian</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Chocolate Paan Cake</span>
+          <span class="menu-item-price">₹320</span>
+        </div>
+        <p class="menu-item-desc">Dark chocolate mousse cake infused with meetha paan, served with gulkand ice cream.</p>
+        <span class="menu-tag tag-chef">Chef's Pick</span>
+      </div>
+    </div>
+
+    <div class="menu-category" id="cat-drinks">
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Mango Lassi</span>
+          <span class="menu-item-price">₹160</span>
+        </div>
+        <p class="menu-item-desc">Thick yogurt blended with Alphonso mango pulp and a hint of cardamom.</p>
+        <span class="menu-tag tag-veg">Vegetarian</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Masala Chaas</span>
+          <span class="menu-item-price">₹120</span>
+        </div>
+        <p class="menu-item-desc">Chilled buttermilk tempered with roasted cumin, mint, and black salt.</p>
+        <span class="menu-tag tag-veg">Vegetarian</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Ember Old Fashioned</span>
+          <span class="menu-item-price">₹480</span>
+        </div>
+        <p class="menu-item-desc">Smoky whisky stirred with house-made saffron bitters and orange zest. (Contains alcohol)</p>
+        <span class="menu-tag tag-chef">Signature</span>
+      </div>
+      <div class="menu-item">
+        <div class="menu-item-header">
+          <span class="menu-item-name">Rose Lemonade</span>
+          <span class="menu-item-price">₹140</span>
+        </div>
+        <p class="menu-item-desc">Fresh lemon juice with house-made rose syrup, mint, and sparkling water.</p>
+        <span class="menu-tag tag-veg">Vegetarian</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- HOURS & CONTACT -->
+<section class="hours" id="hours">
+  <div>
+    <span class="section-tag">Visiting Us</span>
+    <h2 class="section-title">Hours & <em>Location</em></h2>
+    <div class="divider"></div>
+    <div class="open-badge">
+      <span class="open-dot"></span>
+      Open Today
+    </div>
+    <table class="hours-table">
+      <tr><td>Monday – Thursday</td><td>12:00 PM – 10:30 PM</td></tr>
+      <tr><td>Friday</td><td>12:00 PM – 11:30 PM</td></tr>
+      <tr><td>Saturday</td><td>11:00 AM – 11:30 PM</td></tr>
+      <tr><td>Sunday</td><td>11:00 AM – 10:00 PM</td></tr>
+      <tr><td>Public Holidays</td><td class="closed">Call to confirm</td></tr>
+    </table>
+    <p style="margin-top:1.5rem;font-size:0.85rem;color:var(--muted);">Last orders taken 45 minutes before closing. Kitchen may close early during peak seasons.</p>
+  </div>
+  <div>
+    <div class="contact-card">
+      <h3>Find & Reach Us</h3>
+      <div class="contact-row">
+        <span class="contact-icon">📍</span>
+        <p>42, Gulmohar Road, Sector 12<br>Near City Centre Mall<br>Ludhiana, Punjab 141001</p>
+      </div>
+      <div class="contact-row">
+        <span class="contact-icon">📞</span>
+        <p><a href="tel:+911614567890">+91 161 456 7890</a><br><a href="tel:+919876543210">+91 98765 43210</a></p>
+      </div>
+      <div class="contact-row">
+        <span class="contact-icon">✉️</span>
+        <p><a href="mailto:hello@emberandspice.in">hello@emberandspice.in</a></p>
+      </div>
+      <div class="contact-row">
+        <span class="contact-icon">🅿️</span>
+        <p>Free valet parking available<br>Basement parking: 80 spaces</p>
+      </div>
+      <div style="margin-top:1.5rem;border-top:1px solid #3D2B1F;padding-top:1.5rem;display:flex;gap:1.2rem;">
+        <a href="#" style="color:var(--amber);font-size:0.82rem;font-weight:500;letter-spacing:0.06em;text-decoration:none;">Instagram ↗</a>
+        <a href="#" style="color:var(--amber);font-size:0.82rem;font-weight:500;letter-spacing:0.06em;text-decoration:none;">Facebook ↗</a>
+        <a href="#" style="color:var(--amber);font-size:0.82rem;font-weight:500;letter-spacing:0.06em;text-decoration:none;">Zomato ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESERVATION -->
+<section class="reservation" id="reservation">
+  <span class="section-tag">Reserve a Table</span>
+  <h2 class="section-title">Join Us for an <em>Unforgettable</em> Evening</h2>
+  <p>Whether it's a romantic dinner, family celebration, or a business lunch — we'll make it special. Fill in the form and we'll confirm within 2 hours.</p>
+  <div class="res-form">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" placeholder="Your name"/>
+    </div>
+    <div class="form-group">
+      <label>Phone Number</label>
+      <input type="tel" placeholder="+91 XXXXX XXXXX"/>
+    </div>
+    <div class="form-group">
+      <label>Date</label>
+      <input type="date"/>
+    </div>
+    <div class="form-group">
+      <label>Time</label>
+      <select>
+        <option>12:00 PM</option>
+        <option>01:00 PM</option>
+        <option>02:00 PM</option>
+        <option>07:00 PM</option>
+        <option>07:30 PM</option>
+        <option>08:00 PM</option>
+        <option>08:30 PM</option>
+        <option>09:00 PM</option>
+        <option>09:30 PM</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Number of Guests</label>
+      <select>
+        <option>1 Guest</option>
+        <option>2 Guests</option>
+        <option>3–4 Guests</option>
+        <option>5–6 Guests</option>
+        <option>7–10 Guests</option>
+        <option>Large Party (10+)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Occasion</label>
+      <select>
+        <option>Just Dining</option>
+        <option>Birthday</option>
+        <option>Anniversary</option>
+        <option>Business Lunch</option>
+        <option>Family Gathering</option>
+        <option>Other</option>
+      </select>
+    </div>
+    <div class="form-group full">
+      <label>Special Requests</label>
+      <input type="text" placeholder="Dietary needs, seating preferences, celebrations…"/>
+    </div>
+    <button class="res-submit" onclick="alert('Thank you! Your reservation request has been received. We\'ll confirm within 2 hours.')">Confirm Reservation</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Ember <span>&</span> Spice</div>
+  <p>Fine Dining · Ludhiana, Punjab</p>
+  <div class="footer-links">
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#menu">Menu</a>
+    <a href="#hours">Hours</a>
+    <a href="#reservation">Reserve</a>
+  </div>
+  <hr class="footer-divider"/>
+  <p>© 2025 Ember & Spice. All rights reserved. · Designed for Azure Static Web Apps</p>
+</footer>
+
+<script>
+  function switchTab(btn, cat) {
+    document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.menu-category').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('cat-' + cat).classList.add('active');
+  }
+</script>
+
+</body>
+</html>
