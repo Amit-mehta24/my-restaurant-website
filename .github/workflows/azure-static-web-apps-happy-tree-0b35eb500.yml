@@ -28,7 +28,7 @@ jobs:
         uses: actions/github-script@v6
         id: idtoken
         with:
-          skip_app_build: true
+           skip_app_build: true
            script: |
                const coredemo = require('@actions/core')
                return await coredemo.getIDToken()
